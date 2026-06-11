@@ -1,8 +1,6 @@
-# ⚠️ Notice
-I'm unable to find the time to keep this repository well maintained, and up-to-date with Obsidian. Life gets in the way. This plugin should be forked/rebuilt by someone who is willing to find the time to build a plugin that the Obsidian community deserves. 
-
-
 # Obsidian Dynamic ToC
+
+> Forked & maintained by **Jose Mora ([@jmoraxix](https://github.com/jmoraxix))**. This is an actively maintained fork of [aidurber/obsidian-plugin-dynamic-toc](https://github.com/aidurber/obsidian-plugin-dynamic-toc), originally created by [aidurber](https://github.com/aidurber).
 
 An Obsidian plugin to generate Tables of Contents that stay up to date with your document outline. Heavily inspired from [hipstersmoothie/obsidian-plugin-toc](https://github.com/hipstersmoothie/obsidian-plugin-toc)
 
@@ -189,15 +187,31 @@ With this option enabled, it will produce the following table of contents:
 
 ## Contributing
 
+### Getting Started
+
+For live development, clone this repository directly into your test vault's plugin folder:
+
+```
+<YourVault>/.obsidian/plugins/obsidian-dynamic-toc/
+```
+
+**Requirements:** Node.js >= 18 (latest LTS recommended).
+
+Install dependencies:
+
 ```bash
+npm install
+# or
 yarn install
 ```
 
 ### Development
 
-To start building the plugin with what mode enabled run the following command:
+To build the plugin in watch mode, run the following command, then reload Obsidian to pick up changes:
 
 ```bash
+npm run dev
+# or
 yarn dev
 ```
 
@@ -206,8 +220,19 @@ yarn dev
 To start a release build run the following command:
 
 ```bash
+npm run release
+# or
 yarn release
+
 git push --follow-tags origin main
 ```
 
 ---
+
+## Roadmap
+
+> The feature list below will be populated once the TOC plugin landscape investigation is complete and approved.
+
+- [ ] Planned — Toolchain & Obsidian API modernization (latest esbuild, TypeScript, jest, CI)
+- [ ] Planned — Per-codeblock parameter override hardening (validation, inline config errors)
+- [ ] Planned — Features from the TOC landscape investigation (TBD)
