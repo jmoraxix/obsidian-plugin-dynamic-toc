@@ -24,13 +24,14 @@ All planned features are **additive** — existing codeblock syntax, the plugin 
       (`eslint-plugin-obsidianmd`), `MarkdownRenderer.render`, `minAppVersion 1.3.5`,
       Node 22/24 CI, release workflow with build provenance, branch protection with
       required CI checks
+- [x] **Per-block config override hardening** *(PR #2)* — codeblock YAML validation
+      (types, depth ranges, style enum), inline `⚠️ TOC config error` rendering instead
+      of silent failure, and the settings-precedence fix (block > global > defaults,
+      merged lazily so global changes propagate to keys not set in the block)
 
 ## Next up
 
-- [ ] **Per-block config override hardening** *(in design — PR #2)* — validate codeblock
-      YAML (types, depth ranges, style enum), render an inline error instead of failing
-      silently, and fix the settings-precedence bug so global setting changes propagate
-      to keys not set in the block
+- [ ] Pick the first feature from the High priority list below (owner decides)
 
 ## High priority
 
@@ -87,13 +88,16 @@ All planned features are **additive** — existing codeblock syntax, the plugin 
 
 - [ ] Heading text fidelity bug cluster (upstream #69/#66/#45/#62 — tracked as the High
       priority feature above)
-- [ ] Embedded notes show the parent page's headings (upstream #72)
+- [x] Embedded notes show the parent page's headings (upstream #72) — *fixed in PR #2:
+      renderers no longer rebind to other files; pending manual confirmation in a vault*
 - [ ] TOC inside callouts does not update (upstream #77)
-- [ ] TOC renders for the active pane instead of its own note (upstream #53)
+- [x] TOC renders for the active pane instead of its own note (upstream #53) — *fixed in
+      PR #2: file-change and leaf-change handlers now ignore other files*
 - [ ] TOC position wrong in PDF export (upstream #60)
-- [ ] Verify Day Planner plugin compatibility break still applies — Day Planner has been
-      rewritten since (upstream #51)
-- [ ] Retest 2021-era "funky Live Preview" report; likely stale (upstream #34)
+- [x] Day Planner cross-contamination (upstream #51) — *same root cause as #53, fixed in
+      PR #2; pending manual confirmation*
+- [ ] Retest 2021-era "funky Live Preview" report (upstream #34) — pending manual QA;
+      the leaf-change refresh that fixed its sibling #48 was kept, now guarded per-file
 
 ## Declined (from upstream requests)
 
