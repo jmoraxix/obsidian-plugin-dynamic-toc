@@ -27,9 +27,24 @@ export default class DynamicTOCPlugin extends Plugin {
     this.registerMarkdownCodeBlockProcessor(
       "toc",
       (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-        const options = parseConfig(source, this.settings);
+        const result = parseConfig(source);
+        if (result.ok) {
+          for (const warning of result.warnings) {
+            console.warn(`[dynamic-toc] ${ctx.sourcePath}: ${warning}`);
+          }
+        } else {
+          console.warn(
+            `[dynamic-toc] ${ctx.sourcePath}: invalid YAML config — ${result.error}`
+          );
+        }
         ctx.addChild(
-          new CodeBlockRenderer(this.app, options, ctx.sourcePath, el)
+          new CodeBlockRenderer(
+            this.app,
+            result,
+            this.settings,
+            ctx.sourcePath,
+            el
+          )
         );
       }
     );

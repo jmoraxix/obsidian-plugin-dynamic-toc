@@ -1,13 +1,14 @@
 import { App, MarkdownRenderChild, MarkdownRenderer, TFile } from "obsidian";
-import { mergeSettings } from "../utils/config";
+import { mergeConfig, ParseConfigResult } from "../utils/config";
 import { extractHeadings } from "../utils/extract-headings";
-import { DynamicTOCSettings, TableOptions } from "../types";
+import { DynamicTOCSettings } from "../types";
 import { TABLE_CLASS_NAME } from "../constants";
 
 export class CodeBlockRenderer extends MarkdownRenderChild {
   constructor(
     private app: App,
-    private config: TableOptions,
+    private parseResult: ParseConfigResult,
+    private settings: DynamicTOCSettings,
     private filePath: string,
     public container: HTMLElement
   ) {
@@ -40,7 +41,8 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
   };
 
   onSettingsChangeHandler = (settings: DynamicTOCSettings) => {
-    void this.render(mergeSettings(this.config, settings));
+    this.settings = settings;
+    void this.render();
   };
   onFileChangeHandler = (file: TFile) => {
     this.filePath = file.path;
@@ -48,12 +50,22 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
     void this.render();
   };
 
-  async render(configOverride?: TableOptions) {
+  async render() {
     this.container.empty();
     this.container.classList.add(TABLE_CLASS_NAME);
+    if (!this.parseResult.ok) {
+      this.container.createDiv({
+        cls: "dynamic-toc-error",
+        text: `⚠️ TOC config error: ${this.parseResult.error}. Using defaults.`,
+      });
+    }
+    const blockOptions = this.parseResult.ok ? this.parseResult.options : {};
+    // Merge lazily on every render so later global settings changes apply to
+    // every key the block does not explicitly set.
+    const config = mergeConfig(blockOptions, this.settings);
     const headings = extractHeadings(
       this.app.metadataCache.getCache(this.filePath),
-      configOverride || this.config
+      config
     );
     await MarkdownRenderer.render(
       this.app,

@@ -35,7 +35,8 @@ export class DynamicInjectionRenderer extends MarkdownRenderChild {
     );
   }
 
-  onSettingsChangeHandler = () => {
+  onSettingsChangeHandler = (settings: DynamicTOCSettings) => {
+    this.settings = settings;
     void this.render();
   };
   onFileChangeHandler = (file: TFile) => {
