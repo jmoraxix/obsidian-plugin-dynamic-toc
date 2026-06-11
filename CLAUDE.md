@@ -29,7 +29,7 @@ scripts/
   manifest-updater.js            — commit-and-tag-version custom updater for manifest.json
   versions-updater.js            — commit-and-tag-version custom updater for versions.json
 .github/workflows/release.yml    — release CI, triggered by tag push (Node 24, gh release create)
-.github/workflows/lint.yml       — CI build + lint on push/PR (Node 22 & 24 matrix)
+.github/workflows/ci.yml         — CI on push/PR: lint, type-check, test, build (Node 22 & 24 matrix); required check for merging to main
 esbuild.config.mjs               — build config (official sample-plugin pattern + styles.css copy)
 eslint.config.mts                — eslint flat config (typescript-eslint + eslint-plugin-obsidianmd)
 manifest.json                    — Obsidian plugin metadata (id, version, minAppVersion)
