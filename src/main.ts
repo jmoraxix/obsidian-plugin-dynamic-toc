@@ -3,22 +3,19 @@ import { parseConfig } from "./utils/config";
 import { ALL_MATCHERS, DEFAULT_SETTINGS } from "./constants";
 import { CodeBlockRenderer } from "./renderers/code-block-renderer";
 import { DynamicTOCSettingsTab } from "./settings-tab";
-import {
-  DynamicTOCSettings,
-  ExternalMarkdownKey,
-  EXTERNAL_MARKDOWN_PREVIEW_STYLE,
-} from "./types";
+import { DynamicTOCSettings, EXTERNAL_MARKDOWN_PREVIEW_STYLE } from "./types";
 import { DynamicInjectionRenderer } from "./renderers/dynamic-injection-renderer";
 import { InsertCommandModal } from "./insert-command.modal";
 
 export default class DynamicTOCPlugin extends Plugin {
-  settings: DynamicTOCSettings;
+  settings: DynamicTOCSettings = { ...DEFAULT_SETTINGS };
   onload = async () => {
     await this.loadSettings();
     this.addSettingTab(new DynamicTOCSettingsTab(this.app, this));
     this.addCommand({
+      // eslint-disable-next-line obsidianmd/commands/no-command-in-command-id -- historical id; renaming would break existing user hotkey bindings
       id: "dynamic-toc-insert-command",
-      name: "Insert Table of Contents",
+      name: "Insert table of contents",
       editorCallback: (editor: Editor) => {
         const modal = new InsertCommandModal(this.app, this);
         modal.start((text: string) => {
@@ -43,11 +40,11 @@ export default class DynamicTOCPlugin extends Plugin {
           this.settings.supportAllMatchers === true
             ? ALL_MATCHERS
             : [this.settings.externalStyle];
-        for (let matcher of matchers as ExternalMarkdownKey[]) {
+        for (const matcher of matchers) {
           if (!matcher || matcher === "None") continue;
           const match = DynamicInjectionRenderer.findMatch(
             el,
-            EXTERNAL_MARKDOWN_PREVIEW_STYLE[matcher as ExternalMarkdownKey]
+            EXTERNAL_MARKDOWN_PREVIEW_STYLE[matcher]
           );
           if (!match?.parentNode) continue;
           ctx.addChild(
@@ -65,7 +62,11 @@ export default class DynamicTOCPlugin extends Plugin {
   };
 
   loadSettings = async () => {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    this.settings = Object.assign(
+      {},
+      DEFAULT_SETTINGS,
+      (await this.loadData()) as Partial<DynamicTOCSettings> | null
+    );
   };
 
   saveSettings = async () => {

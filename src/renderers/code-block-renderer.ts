@@ -1,14 +1,8 @@
-import {
-  App,
-  MarkdownRenderChild,
-  MarkdownRenderer,
-  TFile,
-  WorkspaceLeaf,
-} from "obsidian";
+import { App, MarkdownRenderChild, MarkdownRenderer, TFile } from "obsidian";
 import { mergeSettings } from "../utils/config";
 import { extractHeadings } from "../utils/extract-headings";
 import { DynamicTOCSettings, TableOptions } from "../types";
-import { TABLE_CLASS_NAME } from "src/constants";
+import { TABLE_CLASS_NAME } from "../constants";
 
 export class CodeBlockRenderer extends MarkdownRenderChild {
   constructor(
@@ -19,11 +13,10 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
   ) {
     super(container);
   }
-  async onload() {
-    await this.render();
+  onload() {
+    void this.render();
     this.registerEvent(
       this.app.metadataCache.on(
-        //@ts-ignore
         "dynamic-toc:settings",
         this.onSettingsChangeHandler
       )
@@ -39,19 +32,20 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
     );
   }
 
-  onActiveLeafChangeHandler = (_: WorkspaceLeaf) => {
+  onActiveLeafChangeHandler = () => {
     const activeFile = this.app.workspace.getActiveFile();
+    if (!activeFile) return;
     this.filePath = activeFile.path;
     this.onFileChangeHandler(activeFile);
   };
 
   onSettingsChangeHandler = (settings: DynamicTOCSettings) => {
-    this.render(mergeSettings(this.config, settings));
+    void this.render(mergeSettings(this.config, settings));
   };
   onFileChangeHandler = (file: TFile) => {
     this.filePath = file.path;
     if (file.deleted) return;
-    this.render();
+    void this.render();
   };
 
   async render(configOverride?: TableOptions) {
@@ -61,7 +55,8 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
       this.app.metadataCache.getCache(this.filePath),
       configOverride || this.config
     );
-    await MarkdownRenderer.renderMarkdown(
+    await MarkdownRenderer.render(
+      this.app,
       headings,
       this.container,
       this.filePath,
