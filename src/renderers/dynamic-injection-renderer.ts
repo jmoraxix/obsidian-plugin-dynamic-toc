@@ -1,4 +1,10 @@
-import { App, MarkdownRenderChild, MarkdownRenderer, TFile } from "obsidian";
+import {
+  App,
+  MarkdownRenderChild,
+  MarkdownRenderer,
+  TAbstractFile,
+  TFile,
+} from "obsidian";
 import { TABLE_CLASS_NAME, TABLE_CLASS_SELECTOR } from "../constants";
 import { DynamicTOCSettings } from "../types";
 import { extractHeadings } from "../utils/extract-headings";
@@ -33,6 +39,7 @@ export class DynamicInjectionRenderer extends MarkdownRenderChild {
     this.registerEvent(
       this.app.metadataCache.on("changed", this.onFileChangeHandler)
     );
+    this.registerEvent(this.app.vault.on("rename", this.onFileRenameHandler));
   }
 
   onSettingsChangeHandler = (settings: DynamicTOCSettings) => {
@@ -41,6 +48,11 @@ export class DynamicInjectionRenderer extends MarkdownRenderChild {
   };
   onFileChangeHandler = (file: TFile) => {
     if (file.deleted || file.path !== this.filePath) return;
+    void this.render();
+  };
+  onFileRenameHandler = (file: TAbstractFile, oldPath: string) => {
+    if (oldPath !== this.filePath) return;
+    this.filePath = file.path;
     void this.render();
   };
 

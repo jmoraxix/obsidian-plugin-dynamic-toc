@@ -1,4 +1,10 @@
-import { App, MarkdownRenderChild, MarkdownRenderer, TFile } from "obsidian";
+import {
+  App,
+  MarkdownRenderChild,
+  MarkdownRenderer,
+  TAbstractFile,
+  TFile,
+} from "obsidian";
 import { mergeConfig, ParseConfigResult } from "../utils/config";
 import { extractHeadings } from "../utils/extract-headings";
 import { DynamicTOCSettings } from "../types";
@@ -31,13 +37,16 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
     this.registerEvent(
       this.app.metadataCache.on("changed", this.onFileChangeHandler)
     );
+    this.registerEvent(this.app.vault.on("rename", this.onFileRenameHandler));
   }
 
+  // Live Preview can render the block before its note gains focus (upstream
+  // #48), so refresh on focus — but only for this renderer's own file, never
+  // rebinding to whatever pane became active (upstream #53/#72/#51).
   onActiveLeafChangeHandler = () => {
     const activeFile = this.app.workspace.getActiveFile();
-    if (!activeFile) return;
-    this.filePath = activeFile.path;
-    this.onFileChangeHandler(activeFile);
+    if (!activeFile || activeFile.path !== this.filePath) return;
+    void this.render();
   };
 
   onSettingsChangeHandler = (settings: DynamicTOCSettings) => {
@@ -45,8 +54,12 @@ export class CodeBlockRenderer extends MarkdownRenderChild {
     void this.render();
   };
   onFileChangeHandler = (file: TFile) => {
+    if (file.deleted || file.path !== this.filePath) return;
+    void this.render();
+  };
+  onFileRenameHandler = (file: TAbstractFile, oldPath: string) => {
+    if (oldPath !== this.filePath) return;
     this.filePath = file.path;
-    if (file.deleted) return;
     void this.render();
   };
 
