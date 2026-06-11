@@ -231,8 +231,4 @@ git push --follow-tags origin main
 
 ## Roadmap
 
-> The feature list below will be populated once the TOC plugin landscape investigation is complete and approved.
-
-- [ ] Planned — Toolchain & Obsidian API modernization (latest esbuild, TypeScript, jest, CI)
-- [ ] Planned — Per-codeblock parameter override hardening (validation, inline config errors)
-- [ ] Planned — Features from the TOC landscape investigation (TBD)
+See [ROADMAP.md](ROADMAP.md) for the prioritized feature roadmap, backed by the [TOC plugin landscape investigation](docs/investigations/toc-landscape.md).

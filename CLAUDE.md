@@ -142,21 +142,20 @@ Stop and surface output for human review at every gate marked in the task list. 
 
 ## Current Roadmap
 
-See `README.md` for the user-facing roadmap. The items below are implementation-level tracking.
+See `ROADMAP.md` for the user-facing prioritized roadmap (linked from README). The items below are implementation-level tracking.
 
-### PR #1 — `chore/fork-revival` (in progress)
+### PR #1 — `chore/fork-revival`
 
 - [x] Remove archive notice from README (Task 1)
 - [x] Create CLAUDE.md (Task 2)
 - [x] Compatibility audit and fixes (Task 3)
-- [ ] TOC landscape investigation and feature proposal (Task 4)
+- [x] TOC landscape investigation and feature proposal (Task 4) — see `docs/investigations/toc-landscape.md`
 
 ### PR #2 — `feat/per-block-override` (pending PR #1 merge)
 
 - [ ] Per-codeblock YAML parameter override system (Task 5) — includes fixing the settings-precedence bug documented in Architecture Notes
 
-### Backlog (pending owner approval of feature proposal)
+### Backlog
 
-- [ ] TBD — populated after Task 4 investigation
-- [ ] Replace `TFile.deleted` hack with `vault.on("delete")` subscriptions
-- [ ] Community plugin directory re-listing (note: id `obsidian-dynamic-toc` contains "obsidian", which current submission rules prohibit for new submissions — needs a conversation with the Obsidian team about grandfathering)
+Tracked in `ROADMAP.md` (approved feature list from the Task 4 investigation, the inherited
+upstream bug-fix track, the `TFile.deleted` cleanup, and directory re-listing).
