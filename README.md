@@ -36,19 +36,21 @@ It's really simple to use, just add a code block to your document:
 
 > 👉YAML does not support tabs, only use spaces ([source](http://yaml.org/faq.html))
 
-**Defaults**
+**Parameters**
 
-````markdown
-```toc
-style: bullet | number | inline (default: bullet)
-min_depth: number (default: 2)
-max_depth: number (default: 6)
-title: string (default: undefined)
-allow_inconsistent_headings: boolean (default: false)
-delimiter: string (default: |)
-varied_style: boolean (default: false)
-```
-````
+Every parameter can be set globally in the plugin settings and overridden per codeblock. The precedence is: codeblock value → global setting → built-in default.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `style` | `bullet` \| `number` \| `inline` | `bullet` | List rendering style |
+| `min_depth` | integer 1–6 | `2` | Minimum heading depth to include |
+| `max_depth` | integer 1–6 | `6` | Maximum heading depth to include |
+| `title` | string | — | Title rendered above the list (wrap markdown in quotes) |
+| `allow_inconsistent_headings` | boolean | `false` | Tolerate skipped heading levels |
+| `delimiter` | string | `\|` | Separator between items (inline style only) |
+| `varied_style` | boolean | `false` | First level uses `style`, deeper levels use the opposite |
+
+Invalid values (e.g. `min_depth: 9` or an unknown `style`) are ignored with a warning in the developer console, falling back to your global settings. If the YAML itself cannot be parsed, the block shows an inline `⚠️ TOC config error` message and renders the TOC with your global settings.
 
 **Example**
 

@@ -68,12 +68,11 @@ Requires Node.js >= 22 (CI runs 22 and 24).
   - `metadataCache.on("changed")` — file content changed
   - custom `"dynamic-toc:settings"` event — fired through `app.metadataCache.trigger(…)` in `main.ts` when settings save
   - `workspace.on("active-leaf-change")` — code-block renderer only
-- **Codeblock content is parsed as YAML** using Obsidian's built-in `parseYaml` (`src/utils/config.ts`). `mergeSettings` prefers defined (non-null) block values over global settings. Malformed YAML currently falls back to global settings silently — hardening this is the Task 5 roadmap item.
-- **Known precedence bug (Task 5 target):** `main.ts` merges block options with global settings once at processor time and stores the fully-merged result; the settings-change handler re-merges against that already-complete config, so later global-settings changes never propagate to keys the user didn't set in the block. Fix direction: store the sparse parsed block options and merge lazily on each render.
+- **Codeblock content is parsed as YAML** using Obsidian's built-in `parseYaml` (`src/utils/config.ts`). `parseConfig` returns a discriminated result; `validateCodeblockConfig` drops invalid fields with warnings (logged with the note's filename); the pure `mergeConfig(block, settings, defaults)` resolves the effective config with the precedence **block > global settings > defaults**. The renderer merges lazily on every render, so later global-settings changes apply to keys the block doesn't set. Malformed YAML renders an inline `.dynamic-toc-error` notice and falls back to global settings.
 - TOC generation is a pure function: `extractHeadings(CachedMetadata, TableOptions)` (`src/utils/extract-headings.ts`) reads `fileMetaData.headings` (no manual markdown parsing) and emits a markdown list string; `src/models/heading.ts` wraps `HeadingCache` and produces `[[#…]]` wiki-link hrefs. The string is rendered with `MarkdownRenderer`, so TOC links behave like native links.
 - Settings persist via the standard `loadData()` / `saveData()` plugin API; defaults in `src/constants.ts`.
 - Hacks to be aware of: `src/obsidian-ex.d.ts` augments `TFile` with the undocumented runtime prop `deleted` (roadmap: replace with vault delete events) and adds a typed `MetadataCache.on("dynamic-toc:settings", …)` overload for the custom event.
-- Tests cover only pure functions (extract-headings snapshots, heading model) — nothing imports Obsidian runtime values except `parseYaml` in `config.ts`. Keep the obsidian-coupled surface thin so tests need no mocks.
+- Tests cover only pure functions (extract-headings snapshots, heading model, config validation/merge) — the only Obsidian runtime value imported is `parseYaml` in `config.ts`, which `config.test.ts` mocks via `jest.mock("obsidian", …, { virtual: true })`. Keep the obsidian-coupled surface thin.
 
 ## Conventions
 
@@ -151,9 +150,10 @@ See `ROADMAP.md` for the user-facing prioritized roadmap (linked from README). T
 - [x] Compatibility audit and fixes (Task 3)
 - [x] TOC landscape investigation and feature proposal (Task 4) — see `docs/investigations/toc-landscape.md`
 
-### PR #2 — `feat/per-block-override` (pending PR #1 merge)
+### PR #2 — `feat/per-block-override`
 
-- [ ] Per-codeblock YAML parameter override system (Task 5) — includes fixing the settings-precedence bug documented in Architecture Notes
+- [x] Per-codeblock YAML parameter override system (Task 5) — validation, inline config errors, settings-precedence fix
+- [x] File-binding fixes: TOC renderers stay bound to their own note (upstream #53, #72, likely #51)
 
 ### Backlog
 
