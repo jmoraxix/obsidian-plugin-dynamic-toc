@@ -26,34 +26,35 @@ src/
     extract-headings.ts          — pure function: CachedMetadata + options → TOC markdown string
   models/__tests__/, utils/__tests__/ — jest unit tests (heading model, extract-headings snapshots)
 scripts/
-  manifest-updater.js            — standard-version custom updater for manifest.json
-  versions-updater.js            — standard-version custom updater for versions.json
-.github/workflows/release.yml    — release CI, triggered by tag push
+  manifest-updater.js            — commit-and-tag-version custom updater for manifest.json
+  versions-updater.js            — commit-and-tag-version custom updater for versions.json
+.github/workflows/release.yml    — release CI, triggered by tag push (Node 24, gh release create)
+.github/workflows/lint.yml       — CI build + lint on push/PR (Node 22 & 24 matrix)
+esbuild.config.mjs               — build config (official sample-plugin pattern + styles.css copy)
+eslint.config.mts                — eslint flat config (typescript-eslint + eslint-plugin-obsidianmd)
 manifest.json                    — Obsidian plugin metadata (id, version, minAppVersion)
 versions.json                    — plugin version ↔ minAppVersion compatibility map
 package.json                     — deps and npm scripts
-tsconfig.json                    — TypeScript compiler config
-jest.config.js                   — test runner config (ts-jest preset)
-.versionrc.js                    — standard-version config wiring the custom updaters
-types.d.ts                       — ambient declaration for *.css imports
+tsconfig.json                    — TypeScript compiler config (strict)
+jest.config.js                   — test runner config (ts-jest transform)
+.versionrc.js                    — commit-and-tag-version config wiring the custom updaters
 media/                           — README screenshots
 ```
 
 ## Build & Dev Commands
 
-> ⚠️ Toolchain modernization is in progress (see Roadmap). The commands below reflect the
-> current state; the build is being migrated from `obsidian-plugin-cli` to a plain
-> `esbuild.config.mjs` (official sample-plugin pattern).
+Requires Node.js >= 22 (CI runs 22 and 24).
 
 | Command | What it does |
 |---|---|
-| `npm install` / `yarn install` | Install dependencies |
-| `npm run dev` / `yarn dev` | Watch-mode build (`obsidian-plugin dev -S src/styles.css src/main.ts`) |
-| `npm run build` / `yarn build` | Production build to repo root (`main.js`, `styles.css`) |
-| `npm test` / `yarn test` | Run jest tests |
+| `npm install` | Install dependencies (lockfile is committed; CI uses `npm ci`) |
+| `npm run dev` | Watch-mode esbuild build → `main.js` + `styles.css` at repo root |
+| `npm run build` | Tests (prebuild) + `tsc -noEmit` + production esbuild build |
+| `npm test` | Run jest tests |
 | `npm run test:watch` | Jest watch mode |
-| `npm run type-check` | `tsc --noEmit` |
-| `npm run release` | Conventional-commit version bump (package.json + manifest.json + versions.json) |
+| `npm run type-check` | `tsc --noEmit` (strict mode) |
+| `npm run lint` | eslint (typescript-eslint + eslint-plugin-obsidianmd) |
+| `npm run release` | `commit-and-tag-version` bump (package.json + manifest.json + versions.json) |
 
 **Live development:** clone the repo into `<vault>/.obsidian/plugins/obsidian-dynamic-toc/`, run `npm run dev`, then reload Obsidian after changes.
 
@@ -71,7 +72,7 @@ media/                           — README screenshots
 - **Known precedence bug (Task 5 target):** `main.ts` merges block options with global settings once at processor time and stores the fully-merged result; the settings-change handler re-merges against that already-complete config, so later global-settings changes never propagate to keys the user didn't set in the block. Fix direction: store the sparse parsed block options and merge lazily on each render.
 - TOC generation is a pure function: `extractHeadings(CachedMetadata, TableOptions)` (`src/utils/extract-headings.ts`) reads `fileMetaData.headings` (no manual markdown parsing) and emits a markdown list string; `src/models/heading.ts` wraps `HeadingCache` and produces `[[#…]]` wiki-link hrefs. The string is rendered with `MarkdownRenderer`, so TOC links behave like native links.
 - Settings persist via the standard `loadData()` / `saveData()` plugin API; defaults in `src/constants.ts`.
-- Hacks to be aware of: `src/obsidian-ex.d.ts` augments `TFile` with the undocumented runtime prop `deleted`; the custom `"dynamic-toc:settings"` event subscriptions carry `//@ts-ignore`.
+- Hacks to be aware of: `src/obsidian-ex.d.ts` augments `TFile` with the undocumented runtime prop `deleted` (roadmap: replace with vault delete events) and adds a typed `MetadataCache.on("dynamic-toc:settings", …)` overload for the custom event.
 - Tests cover only pure functions (extract-headings snapshots, heading model) — nothing imports Obsidian runtime values except `parseYaml` in `config.ts`. Keep the obsidian-coupled surface thin so tests need no mocks.
 
 ## Conventions
@@ -147,7 +148,7 @@ See `README.md` for the user-facing roadmap. The items below are implementation-
 
 - [x] Remove archive notice from README (Task 1)
 - [x] Create CLAUDE.md (Task 2)
-- [ ] Compatibility audit and fixes (Task 3)
+- [x] Compatibility audit and fixes (Task 3)
 - [ ] TOC landscape investigation and feature proposal (Task 4)
 
 ### PR #2 — `feat/per-block-override` (pending PR #1 merge)
@@ -158,4 +159,4 @@ See `README.md` for the user-facing roadmap. The items below are implementation-
 
 - [ ] TBD — populated after Task 4 investigation
 - [ ] Replace `TFile.deleted` hack with `vault.on("delete")` subscriptions
-- [ ] Evaluate full TypeScript `strict` follow-ups surfaced during modernization
+- [ ] Community plugin directory re-listing (note: id `obsidian-dynamic-toc` contains "obsidian", which current submission rules prohibit for new submissions — needs a conversation with the Obsidian team about grandfathering)

@@ -12,12 +12,11 @@ export class DynamicTOCSettingsTab extends PluginSettingTab {
   }
 
   display(): void {
-    let { containerEl } = this;
+    const { containerEl } = this;
 
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Dynamic Table of Contents Settings" });
     new Setting(containerEl)
-      .setName("List Style")
+      .setName("List style")
       .setDesc("The table indication")
       .addDropdown((cb) =>
         cb
@@ -34,10 +33,12 @@ export class DynamicTOCSettingsTab extends PluginSettingTab {
         "Varied style allows for the most top level heading to match your list style, then subsequent levels to be the opposite. For example if your list style is number, then your level 2 headings will be number, any levels lower then 2 will be bullet and vice versa."
       )
       .addToggle((cb) =>
-        cb.setValue(this.plugin.settings.varied_style).onChange(async (val) => {
-          this.plugin.settings.varied_style = val;
-          await this.plugin.saveSettings();
-        })
+        cb
+          .setValue(this.plugin.settings.varied_style ?? false)
+          .onChange(async (val) => {
+            this.plugin.settings.varied_style = val;
+            await this.plugin.saveSettings();
+          })
       );
 
     new Setting(containerEl)
@@ -47,25 +48,24 @@ export class DynamicTOCSettingsTab extends PluginSettingTab {
       )
       .addText((text) =>
         text
-          .setPlaceholder("e.g. -, *, ~")
-          .setValue(this.plugin.settings.delimiter)
+          .setPlaceholder("E.g. -, *, ~")
+          .setValue(this.plugin.settings.delimiter ?? "")
           .onChange(async (val) => {
             this.plugin.settings.delimiter = val;
-            this.plugin.saveSettings();
+            await this.plugin.saveSettings();
           })
       );
 
     new Setting(containerEl)
-      .setName("Minimum Header Depth")
+      .setName("Minimum header depth")
       .setDesc("The default minimum header depth to render")
       .addSlider((slider) =>
         slider
           .setLimits(1, 6, 1)
           .setValue(this.plugin.settings.min_depth)
-          .setDynamicTooltip()
           .onChange(async (val) => {
             if (val > this.plugin.settings.max_depth) {
-              new Notice("Min Depth is higher than Max Depth");
+              new Notice("Min depth is higher than max depth");
             } else {
               this.plugin.settings.min_depth = val;
               await this.plugin.saveSettings();
@@ -73,16 +73,15 @@ export class DynamicTOCSettingsTab extends PluginSettingTab {
           })
       );
     new Setting(containerEl)
-      .setName("Maximum Header Depth")
+      .setName("Maximum header depth")
       .setDesc("The default maximum header depth to render")
       .addSlider((slider) =>
         slider
           .setLimits(1, 6, 1)
           .setValue(this.plugin.settings.max_depth)
-          .setDynamicTooltip()
           .onChange(async (val) => {
             if (val < this.plugin.settings.min_depth) {
-              new Notice("Max Depth is higher than Min Depth");
+              new Notice("Max depth is higher than min depth");
             } else {
               this.plugin.settings.max_depth = val;
               await this.plugin.saveSettings();
@@ -92,37 +91,29 @@ export class DynamicTOCSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Title")
       .setDesc(
-        "The title of the table of contents, supports simple markdown such as ## Contents or **Contents**"
+        "The title of the table of contents, supports simple Markdown such as ## contents or **contents**"
       )
       .addText((text) =>
         text
-          .setPlaceholder("## Table of Contents")
-          .setValue(this.plugin.settings.title)
+          .setPlaceholder("## Table of contents")
+          .setValue(this.plugin.settings.title ?? "")
           .onChange(async (val) => {
             this.plugin.settings.title = val;
-            this.plugin.saveSettings();
+            await this.plugin.saveSettings();
           })
       );
     const externalRendererSetting = new Setting(containerEl)
       .setName("External rendering support")
       .setDesc(
-        "Different markdown viewers provided Table of Contents support such as [TOC] or [[_TOC_]]. You may need to restart Obsidian for this to take effect."
+        "Different Markdown viewers provided table of contents support such as [toc] or [[_toc_]]. You may need to restart Obsidian for this to take effect."
       )
       .addDropdown((cb) =>
         cb
-          .addOptions(
-            Object.keys(EXTERNAL_MARKDOWN_PREVIEW_STYLE).reduce(
-              (acc, curr: keyof typeof EXTERNAL_MARKDOWN_PREVIEW_STYLE) => {
-                const value = EXTERNAL_MARKDOWN_PREVIEW_STYLE[curr];
-                return { ...acc, [curr]: value };
-              },
-              {} as Record<string, string>
-            )
-          )
+          .addOptions(EXTERNAL_MARKDOWN_PREVIEW_STYLE)
           .setDisabled(this.plugin.settings.supportAllMatchers)
           .setValue(this.plugin.settings.externalStyle)
-          .onChange(async (val: ExternalMarkdownKey) => {
-            this.plugin.settings.externalStyle = val;
+          .onChange(async (val) => {
+            this.plugin.settings.externalStyle = val as ExternalMarkdownKey;
             await this.plugin.saveSettings();
           })
       );
@@ -142,7 +133,7 @@ export class DynamicTOCSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Allow inconsistent heading levels")
       .setDesc(
-        "NOT RECOMMENDED (may be removed in future): If enabled, the table of contents will be generated even if the header depth is inconsistent. This may cause the table of contents to be rendered incorrectly."
+        "Not recommended (may be removed in future): If enabled, the table of contents will be generated even if the header depth is inconsistent. This may cause the table of contents to be rendered incorrectly."
       )
       .addToggle((cb) =>
         cb

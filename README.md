@@ -195,7 +195,7 @@ For live development, clone this repository directly into your test vault's plug
 <YourVault>/.obsidian/plugins/obsidian-dynamic-toc/
 ```
 
-**Requirements:** Node.js >= 18 (latest LTS recommended).
+**Requirements:** Node.js >= 22 (Node 24 LTS recommended).
 
 Install dependencies:
 

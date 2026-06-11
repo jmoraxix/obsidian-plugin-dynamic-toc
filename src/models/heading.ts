@@ -19,7 +19,7 @@ export class Heading {
     const parts = value.split("|");
     return `#${parts.join(" ")}`;
   }
-  get markdownHref(): string | null {
+  get markdownHref(): string {
     if (!this.isLink) return `[[#${this.rawHeading}]]`;
     const value = this.parseMarkdownLink(this.rawHeading);
     const parts = value.split("|");
@@ -37,6 +37,6 @@ export class Heading {
 
   private parseMarkdownLink(link: string): string {
     const [, base] = link.match(/\[\[(.*?)]\]/) || [];
-    return base;
+    return base ?? "";
   }
 }

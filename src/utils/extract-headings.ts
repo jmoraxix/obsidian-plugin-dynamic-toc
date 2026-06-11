@@ -3,7 +3,7 @@ import { Heading } from "../models/heading";
 import { TableOptions } from "../types";
 
 export function extractHeadings(
-  fileMetaData: CachedMetadata,
+  fileMetaData: CachedMetadata | null,
   options: TableOptions
 ) {
   if (!fileMetaData?.headings) return "";
@@ -40,16 +40,16 @@ function getIndicator(
  * @returns
  */
 function buildMarkdownText(headings: Heading[], options: TableOptions): string {
-  const firstHeadingDepth = headings[0].level;
+  const [firstHeading] = headings;
+  if (!firstHeading) return "";
+  const firstHeadingDepth = firstHeading.level;
   const list: string[] = [];
   if (options.title) {
     list.push(`${options.title}`);
   }
 
   let previousIndent = 0;
-  for (let i = 0; i < headings.length; i++) {
-    const heading = headings[i];
-
+  for (const heading of headings) {
     const itemIndication = getIndicator(heading, firstHeadingDepth, options);
     let numIndents = new Array(Math.max(0, heading.level - firstHeadingDepth));
 

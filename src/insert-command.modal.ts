@@ -2,16 +2,10 @@ import { App, FuzzySuggestModal } from "obsidian";
 import DynamicTOCPlugin from "./main";
 import { ExternalMarkdownKey } from "./types";
 
-type OptionsCollection = Record<
-  Exclude<ExternalMarkdownKey, "None"> & "code-block",
-  {
-    label: string;
-    value: string;
-  }
->;
+type OptionKey = Exclude<ExternalMarkdownKey, "None"> | "code-block";
 
 // TODO refactor to use this as external matchers value so we have a single source of truth
-const options: OptionsCollection = {
+const options: Record<OptionKey, { label: string; value: string }> = {
   "code-block": { value: `\`\`\`toc\n\`\`\``, label: "Code block" },
   TOC: { value: "[TOC]", label: "[TOC]" },
   _TOC_: { label: "__TOC__", value: "[[__TOC__]]" },
@@ -21,10 +15,10 @@ const options: OptionsCollection = {
 };
 export class InsertCommandModal extends FuzzySuggestModal<string> {
   private plugin: DynamicTOCPlugin;
-  callback: (item: string) => void;
+  // Always assigned via start() before the modal opens.
+  callback!: (item: string) => void;
   constructor(app: App, plugin: DynamicTOCPlugin) {
     super(app);
-    this.app = app;
     this.plugin = plugin;
     this.setPlaceholder("Type name of table of contents type...");
   }
@@ -38,11 +32,10 @@ export class InsertCommandModal extends FuzzySuggestModal<string> {
     return ["code-block"];
   }
   getItemText(id: string): string {
-    const foundKey = Object.keys(options).find((v) => v === id);
-    return options[foundKey].label;
+    return options[id as OptionKey].label;
   }
   onChooseItem(item: string): void {
-    this.callback(options[item].value);
+    this.callback(options[item as OptionKey].value);
   }
   public start(callback: (item: string) => void): void {
     this.callback = callback;

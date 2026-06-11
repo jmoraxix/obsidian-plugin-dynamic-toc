@@ -1,5 +1,5 @@
 import { CachedMetadata } from "obsidian";
-import { TableOptions } from "src/types";
+import { TableOptions } from "../../types";
 import { extractHeadings } from "../extract-headings";
 
 describe("Extract headings", () => {

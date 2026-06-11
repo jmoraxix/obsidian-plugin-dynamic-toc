@@ -11,14 +11,22 @@ export function mergeSettings(
   settings: DynamicTOCSettings
 ): TableOptions {
   const merged = Object.assign({}, settings, options);
-  return Object.keys(merged).reduce((acc, curr: keyof TableOptions) => {
-    const value = options[curr];
-    const isEmptyValue = typeof value === "undefined" || value === null;
-    return {
-      ...acc,
-      [curr]: isEmptyValue ? settings[curr] : value,
-    };
-  }, {} as TableOptions);
+  const result = {} as TableOptions;
+  for (const key of Object.keys(merged) as (keyof TableOptions)[]) {
+    assignWithFallback(result, key, options, settings);
+  }
+  return result;
+}
+
+function assignWithFallback<K extends keyof TableOptions>(
+  target: TableOptions,
+  key: K,
+  options: TableOptions,
+  settings: DynamicTOCSettings
+): void {
+  const value = options[key];
+  const isEmptyValue = typeof value === "undefined" || value === null;
+  target[key] = isEmptyValue ? settings[key] : value;
 }
 /**
  * Parse the YAML source and merge it with plugin settings
@@ -33,7 +41,7 @@ export function parseConfig(
   try {
     const options = parseYaml(source) as TableOptions;
     return mergeSettings(options, settings);
-  } catch (error) {
+  } catch {
     return settings;
   }
 }

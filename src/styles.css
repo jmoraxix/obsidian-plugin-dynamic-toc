@@ -22,3 +22,8 @@
 .is-live-preview .dynamic-toc ol {
     white-space: normal;
 }
+
+/* External marker (e.g. [TOC]) kept in the DOM as an anchor for the injected table */
+.dynamic-toc-source-marker {
+    display: none;
+}
